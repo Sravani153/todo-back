@@ -1,0 +1,190 @@
+openapi: 3.0.2
+info:
+  title: To-Do Application API
+  version: 1.0.0
+  description: API for managing users.
+servers:
+  - url: 'https://com.soprasteria/todo/api/{version}'
+    description: Productive environment
+    variables:
+      version:
+        default: v1
+  - url: 'https://com.soprasteria/todo/api/{version}'
+    description: Acceptance environment
+    variables:
+      version:
+        default: v1
+tags:
+  - name: users
+    description: User Management
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      tags: [users]
+      operationId: getAllUsers
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDTO'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Create a new user
+      tags: [users]
+      operationId: createUser
+      requestBody:
+        description: User to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDTO'
+      responses:
+        '201':
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [users]
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      summary: Update a user
+      tags: [users]
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Updated user details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDTO'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Delete a user
+      tags: [users]
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content, user deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Name of the user
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth of the user
+        gender:
+          type: string
+          description: Gender of the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        phoneNumbers:
+          type: array
+          items:
+            type: string
+          description: List of phone numbers associated with the user
+        bookmarked:
+          type: boolean
+          description: Whether the user is bookmarked
+
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
